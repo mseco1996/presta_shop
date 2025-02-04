@@ -1,0 +1,90 @@
+# prestashop_automation Project
+
+## 1️⃣ Setup Instructions
+### Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### Run UI Tests
+```bash
+pytest tests/ --browser=chromium
+pytest tests/ --browser=firefox
+```
+
+### Generate Allure Report
+```bash
+pytest --alluredir=reports/
+allure serve reports/
+```
+
+---
+
+## 2️⃣ Project Structure
+```
+prestashop-automation/
+│── tests/
+│   ├── test_create_account.py
+│   ├── test_contact_us.py
+│   ├── test_submit_single_order.py
+│   ├── test_submit_multiple_orders.py
+│   ├── test_cart_modification.py
+│   ├── test_navigation.py
+│   ├── test_newsletter_signup.py
+│   ├── api/
+│   │   ├── test_contact_us_api.py
+│   │   ├── test_login_api.py
+│   ├── performance/
+│   │   ├── test_login_load.py
+│── pages/  # Page Object Model (POM)
+│   ├── base_page.py
+│   ├── login_page.py
+│   ├── contact_us_page.py
+│   ├── checkout_page.py
+│   ├── cart_page.py
+│   ├── navigation_page.py
+│── config/
+│   ├── config.json  # Stores credentials & URLs
+│── utils/
+│   ├── test_data.json  # Stores test data
+│   ├── logger.py  # Logs test execution times
+│── reports/  # Stores test execution reports
+│── requirements.txt  # Dependencies
+│── .github/workflows/
+│   ├── ci.yml  # GitHub Actions CI/CD Pipeline
+│── README.md
+```
+
+---
+
+## 3️⃣ Sample Test Script - `test_create_account.py`
+```python
+from playwright.sync_api import Page
+
+def test_create_account(page: Page):
+    page.goto("https://demo.prestashop.com/#/en/front")
+    page.locator("input[name='email']").fill("test@dummy.io")
+    page.locator("input[name='password']").fill("SecurePass123")
+    page.locator("button[type='submit']").click()
+    assert page.locator(".account-dashboard").is_visible()
+```
+
+---
+
+## 4️⃣ CI/CD Integration (GitHub Actions)
+### `.github/workflows/ci.yml`
+```yaml
+name: UI Automation Tests
+on:
+  push:
+    branches:
+      - main
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: pip install pytest playwright
+      - name: Run Tests
+        run: pytest tests/
