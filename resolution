@@ -1,0 +1,42 @@
+from playwright.sync_api import Page
+class CreateAccountPage:
+    def __init__(self, page: Page):
+        self.page = page
+        self.email_field = page.locator("input[name='email']")
+        self.password_field = page.locator("input[name='password']")
+        self.submit_btn = page.locator("button[type='submit']")
+
+    def create_account(self, email, password):
+        self.page.goto("https://demo.prestashop.com/#/en/front")
+        self.email_field.fill(email)
+        self.password_field.fill(password)
+        self.submit_btn.click()
+        return self.page.wait_for_selector(".account-dashboard")
+def test_contact_us_form(page: Page):
+    page.goto("https://demo.prestashop.com/#/en/front/contact")
+    page.locator("input[name='email']").fill("test@addy.io")
+    page.locator("textarea[name='message']").fill("This is a test message")
+    page.locator("input[type='file']").set_input_files("test_data/sample.txt")
+    page.locator("button[type='submit']").click()
+    assert page.locator(".success-message").is_visible()
+def test_order_single_item(page: Page):
+    page.goto("https://demo.prestashop.com/#/en/front")
+    page.locator(".product-title").first.click()
+    page.locator("#add-to-cart").click()
+    page.locator(".checkout-button").click()
+    assert "Order Confirmation" in page.title()
+def test_modify_cart(page: Page):
+    page.goto("https://demo.prestashop.com/#/en/front/cart")
+    page.locator(".cart-item-quantity").fill("2")
+    page.locator(".update-cart").click()
+    assert page.locator(".cart-total").text_content() == "$40"
+def test_navigation_languages(page: Page):
+    page.goto("https://demo.prestashop.com/#/en/front")
+    page.locator(".language-selector").click()
+    page.locator("text='Français'").click()
+    assert page.locator(".header").text_content() == "Accueil"
+def test_newsletter_signup(page: Page):
+    page.goto("https://demo.prestashop.com/#/en/front")
+    page.locator("input[name='newsletter']").fill("invalid-email")
+    page.locator(".newsletter-submit").click()
+    assert page.locator(".error-message").is_visible()
